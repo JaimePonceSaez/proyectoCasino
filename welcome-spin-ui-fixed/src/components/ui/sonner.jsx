@@ -1,14 +1,8 @@
-import * as React from "react";
-import { Toaster as SonnerToaster, toast } from "sonner";
-import { useTheme } from "next-themes";
+import { Toaster as SonnerToaster } from "sonner";
 
 export function Toaster() {
-  const { theme = "system" } = useTheme();
-
   return (
     <SonnerToaster
-      theme={theme}
-      className="toaster"
       richColors
       closeButton
       expand
@@ -16,4 +10,4 @@ export function Toaster() {
   );
 }
 
-export { toast };
+export { toast } from "sonner";

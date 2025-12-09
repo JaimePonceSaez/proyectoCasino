@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BalanceProvider } from "@/contexts/BalanceContext";
+
 import Index from "./pages/Index";
 import Roulette from "./pages/Roulette";
 import Slots from "./pages/Slots";
@@ -14,19 +15,21 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <BalanceProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+      <BrowserRouter>
+        {/* 🔥 AHORA EL PROVIDER ENVUELVE TODA LA APP */}
+        <BalanceProvider>
+          <Toaster />
+          <Sonner />
+
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/roulette" element={<Roulette />} />
             <Route path="/slots" element={<Slots />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </BalanceProvider>
+
+        </BalanceProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
