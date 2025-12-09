@@ -1,0 +1,22 @@
+import * as React from "react";
+import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
+import { cn } from "@/lib/utils";
+
+export const HoverCard = HoverCardPrimitive.Root;
+export const HoverCardTrigger = HoverCardPrimitive.Trigger;
+
+export const HoverCardContent = React.forwardRef(
+  ({ className, sideOffset = 4, ...props }, ref) => (
+    <HoverCardPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 w-64 rounded-md border bg-popover p-4 shadow-md",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+
+HoverCardContent.displayName = "HoverCardContent";

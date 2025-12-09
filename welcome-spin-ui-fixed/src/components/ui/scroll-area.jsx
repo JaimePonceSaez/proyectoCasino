@@ -1,0 +1,25 @@
+import * as React from "react";
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import { cn } from "@/lib/utils";
+
+export const ScrollArea = React.forwardRef(
+  ({ className, children, ...props }, ref) => (
+    <ScrollAreaPrimitive.Root
+      ref={ref}
+      className={cn("relative overflow-hidden", className)}
+      {...props}
+    >
+      <ScrollAreaPrimitive.Viewport className="h-full w-full">
+        {children}
+      </ScrollAreaPrimitive.Viewport>
+      <ScrollAreaPrimitive.Scrollbar
+        orientation="vertical"
+        className="flex w-2 touch-none select-none bg-transparent"
+      >
+        <ScrollAreaPrimitive.Thumb className="rounded-full bg-border" />
+      </ScrollAreaPrimitive.Scrollbar>
+    </ScrollAreaPrimitive.Root>
+  )
+);
+
+ScrollArea.displayName = "ScrollArea";
