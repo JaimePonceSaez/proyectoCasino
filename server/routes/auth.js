@@ -4,27 +4,39 @@ import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
-// REGISTER
+// REGISTRO DE USUARIO
 router.post("/register", async (req, res) => {
-  try {
-    const { username, password } = req.body;
+  const { username, email, password } = req.body;
 
-    const exists = await User.findOne({ username });
-    if (exists)
-      return res.status(400).json({ message: "El usuario ya existe" });
-
-    const hashed = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      username,
-      password: hashed
-    });
-
-    res.json({ message: "Usuario registrado", userId: user._id });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error del servidor" });
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    return res.status(400).json({ success: false, message: "El usuario ya existe" });
   }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = await User.create({
+    username,
+    email,
+    password: hashedPassword,
+  });
+
+  res.json({ success: true, user: newUser });
+});
+
+// LOGIN DE USUARIO
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user)
+    return res.status(400).json({ success: false, message: "Usuario no encontrado" });
+
+  const match = await bcrypt.compare(password, user.password);
+  if (!match)
+    return res.status(400).json({ success: false, message: "Contraseña incorrecta" });
+
+  res.json({ success: true, user });
 });
 
 export default router;

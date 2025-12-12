@@ -1,54 +1,77 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 
-export default function Register() {
+export default function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:4000/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const response = await fetch("http://localhost:4000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-    const data = await res.json();
+      const data = await response.json();
 
-    if (!res.ok) {
-      toast.error(data.message);
-      return;
+      if (!response.ok) {
+        toast.error(data.message || "Credenciales inválidas");
+        return;
+      }
+
+      // Guardar token y usuario
+      localStorage.setItem("token", data.token);
+      login(data.user);
+
+      toast.success("Inicio de sesión exitoso 🎉");
+
+      // Redirigir al inicio
+      navigate("/");
+    } catch (error) {
+      toast.error("Error al conectar con el servidor");
     }
-
-    toast.success("Usuario registrado correctamente 🎉");
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-background">
-      <form onSubmit={handleRegister} className="p-6 bg-card shadow-lg rounded-md">
-        <h1 className="text-2xl font-bold mb-4">Crear cuenta</h1>
+    <div className="flex justify-center items-center min-h-screen bg-background">
+      <form className="bg-card p-6 shadow rounded-md w-80" onSubmit={handleSubmit}>
+        <h1 className="text-2xl font-bold mb-4 text-center">Iniciar Sesión</h1>
 
-        <Input
+        <input
+          className="border p-2 w-full mb-3 rounded"
           placeholder="Usuario"
-          className="mb-3"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
         />
 
-        <Input
-          placeholder="Contraseña"
+        <input
+          className="border p-2 w-full mb-3 rounded"
           type="password"
-          className="mb-3"
+          placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
-        <Button type="submit" className="w-full">
-          Registrarse
-        </Button>
+        <button className="bg-primary text-white w-full py-2 rounded mt-2 hover:bg-primary/90">
+          Entrar
+        </button>
+
+        <p className="text-center text-sm mt-4 text-muted-foreground">
+          ¿No tienes cuenta?
+          <Link to="/register" className="text-primary font-semibold ml-1">
+            Regístrate aquí
+          </Link>
+        </p>
       </form>
     </div>
   );

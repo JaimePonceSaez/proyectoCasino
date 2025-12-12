@@ -1,57 +1,74 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "sonner";
+import { useAuth } from "./AuthContext";
 
-const BalanceContext = createContext(undefined);
-
-const INITIAL_BALANCE = 1000;
-const STORAGE_KEY = 'casino-balance';
+const BalanceContext = createContext();
+const API = "http://localhost:4000/api/users";
 
 export const BalanceProvider = ({ children }) => {
-  const [balance, setBalance] = useState(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? parseFloat(stored) : INITIAL_BALANCE;
-  });
+  const { user } = useAuth();
+  const [balance, setBalance] = useState(0);
 
+  // Obtener saldo desde MongoDB al iniciar
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, balance.toString());
-  }, [balance]);
+    if (!user) return;
 
-  const addWinnings = (amount) => {
-    setBalance(prev => prev + amount);
-    toast.success(`¡Ganaste €${amount.toFixed(2)}!`, {
-      description: `Nuevo saldo: €${(balance + amount).toFixed(2)}`,
+    const loadBalance = async () => {
+      const res = await fetch(`${API}/balance/${user.username}`);
+      const data = await res.json();
+
+      if (data.success) setBalance(data.balance);
+    };
+
+    loadBalance();
+  }, [user]);
+
+  // Actualizar saldo en MongoDB
+  const saveBalance = async (newBalance) => {
+    await fetch(`${API}/balance/update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: user.username,
+        amount: newBalance,
+      }),
     });
   };
 
+  // Añadir dinero
+  const addWinnings = (amount) => {
+    const updated = balance + amount;
+    setBalance(updated);
+    saveBalance(updated);
+    toast.success(`Has añadido €${amount}`);
+  };
+
+  // Quitar dinero
   const deductBet = (amount) => {
     if (balance < amount) {
-      toast.error('Saldo insuficiente', {
-        description: 'No tienes suficiente dinero para esta apuesta',
-      });
-      return false;
+      toast.error("Saldo insuficiente");
+      return;
     }
-    setBalance(prev => prev - amount);
-    return true;
+
+    const updated = balance - amount;
+    setBalance(updated);
+    saveBalance(updated);
   };
 
+  // Reiniciar saldo
   const resetBalance = () => {
-    setBalance(INITIAL_BALANCE);
-    toast.info('Saldo reiniciado', {
-      description: `Tu saldo ha sido restablecido a €${INITIAL_BALANCE}`,
-    });
+    setBalance(1000);
+    saveBalance(1000);
+    toast.info("Saldo reiniciado");
   };
 
   return (
-    <BalanceContext.Provider value={{ balance, addWinnings, deductBet, resetBalance }}>
+    <BalanceContext.Provider
+      value={{ balance, addWinnings, deductBet, resetBalance }}
+    >
       {children}
     </BalanceContext.Provider>
   );
 };
 
-export const useBalance = () => {
-  const context = useContext(BalanceContext);
-  if (!context) {
-    throw new Error('useBalance must be used within BalanceProvider');
-  }
-  return context;
-};
+export const useBalance = () => useContext(BalanceContext);

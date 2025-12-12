@@ -1,39 +1,34 @@
 import express from "express";
 import User from "../models/User.js";
-import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// GET /api/users/me  → Perfil usuario
-router.get("/me", authMiddleware, async (req, res) => {
+// Obtener saldo del usuario
+router.get("/balance/:username", async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) return res.json({ success: false, message: "Usuario no encontrado" });
+
+    res.json({ success: true, balance: user.balance });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.json({ success: false, message: err.message });
   }
 });
 
-// PATCH /api/users/balance  → actualizar saldo
-router.patch("/balance", authMiddleware, async (req, res) => {
+// Actualizar saldo del usuario
+router.post("/balance/update", async (req, res) => {
   try {
-    const { amount, op } = req.body;
-    const user = await User.findById(req.user.id);
+    const { username, amount } = req.body;
+    const user = await User.findOne({ username });
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.json({ success: false, message: "Usuario no encontrado" });
 
-    if (op === "inc") user.balance += amount;
-    else if (op === "dec") {
-      if (user.balance < amount) return res.status(400).json({ message: "Insufficient balance" });
-      user.balance -= amount;
-    } else if (op === "set") user.balance = amount;
-    else return res.status(400).json({ message: "Invalid operation" });
-
+    user.balance = amount;
     await user.save();
-    return res.json({ balance: user.balance });
+
+    res.json({ success: true, newBalance: user.balance });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.json({ success: false, message: err.message });
   }
 });
 

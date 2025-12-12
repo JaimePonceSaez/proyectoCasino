@@ -3,17 +3,18 @@ import { createContext, useContext, useState } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // null = no login
-
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("casino-user", JSON.stringify(userData));
+  // Usuario automático
+  const defaultUser = {
+    username: "dam",
+    email: "dam@casino.com"
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("casino-user");
-  };
+  // Siempre estará logueado
+  const [user, setUser] = useState(defaultUser);
+
+  const login = () => setUser(defaultUser);
+
+  const logout = () => setUser(null);
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

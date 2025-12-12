@@ -54,27 +54,17 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Derecha del header */}
+          {/* Zona derecha */}
           <div className="flex items-center gap-4">
 
-            {/* LOGIN / USER */}
-            {!user ? (
-              /* Si NO hay usuario → botón LOGIN */
-              <Link to="/login">
-                <Button variant="outline">Iniciar Sesión</Button>
-              </Link>
-            ) : (
-              /* Si hay usuario → mostrar nombre + logout */
-              <>
-                <span className="font-semibold text-primary">
-                  Hola, {user.username}
-                </span>
+            {/* USUARIO SIEMPRE ACTIVO */}
+            <span className="font-semibold text-primary">
+              Hola, {user?.username}
+            </span>
 
-                <Button variant="outline" onClick={logout}>
-                  Cerrar sesión
-                </Button>
-              </>
-            )}
+            <Button variant="outline" onClick={logout}>
+              Cerrar sesión
+            </Button>
 
             {/* SALDO */}
             <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-lg glow-gold">

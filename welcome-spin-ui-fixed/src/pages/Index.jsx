@@ -4,7 +4,16 @@ import { Card } from '@/components/ui/card';
 import { CircleDot, Cherry, Sparkles, TrendingUp } from 'lucide-react';
 import Header from '@/components/Header';
 
+// Importar AuthContext
+import { useAuth } from "@/contexts/AuthContext";
+
+// Importar WalletManager
+import WalletManager from "@/components/WalletManager";
+
 const Index = () => {
+  
+  const { user } = useAuth(); // Saber si hay usuario logueado
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -39,6 +48,18 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* ----------- AGREGAMOS EL MANEJADOR DE SALDO ----------- */}
+      <section className="px-4 py-10 flex justify-center">
+        {user ? (
+          <WalletManager username={user.username} />
+        ) : (
+          <p className="text-center text-lg text-muted-foreground">
+            🔐 Inicia sesión para gestionar tu dinero.
+          </p>
+        )}
+      </section>
+      {/* ------------------------------------------------------- */}
 
       {/* Games Section */}
       <section className="py-20 px-4 bg-card/30">
